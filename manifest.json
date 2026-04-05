@@ -1,7 +1,7 @@
 {
   "name": "日历",
   "short_name": "日历",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "id":"/",
   "icons": [
