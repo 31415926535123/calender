@@ -1,0 +1,14 @@
+{
+  "name": "日历",
+  "short_name": "日历",
+  "start_url": "/",
+  "display": "standalone",
+  "id":"/",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ]
+}
