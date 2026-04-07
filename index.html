@@ -75,9 +75,10 @@
 <div>
   <color-picker-menu></color-picker-menu>
   
-  <div>
+  <div id="main">
     <calendar-header id="header"></calendar-header>
-    <calendar-weekdays></calendar-weekdays>
+    <calendar-excel></calendar-excel>
+    <calendar-excel id="supplement"></calendar-excel>
     <calendar-dates id="dates"></calendar-dates>
   </div>
   <div class="calendar-nav">
@@ -87,7 +88,9 @@
 </div>
 <script type="module">
   import "./color.js";
-  import "./first.js";import "./date.js";
+  import "./date.js";
+  import "./header.js";
+  import "./excel.js";
   let year = new Date().getFullYear();
   let month = new Date().getMonth();
   const con=[document.querySelector('calendar-header'),document.querySelector('calendar-dates')]
@@ -112,7 +115,9 @@ if (month==11){
 else{month+=1;}
 update(con,year,month);
   })
-
+const supple=document.querySelector('#supplement');
+supple.readOnly=false;supple.render();
+for(let i=0;i<7;i++){supple.setCellValue(i,'');}
 </script>
 
 </body>
