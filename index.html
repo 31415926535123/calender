@@ -16,31 +16,11 @@
     <div id="app"></div>
 
     <script type="module">
+      import longpressDirective from "./longpress.js";
+      import { LargeEditorModal, CalendarMarker } from "./utils.js";
       import { storage } from "./store.js";
       import { createApp, ref, computed, watch } from "vue";
-      const CalendarMarker = {
-        props: {
-          type: { type: String, default: "circle" },
-          color: { type: String, default: "#000000" },
-          size: { type: Number, default: 16 },
-        },
-        template: `
-    <svg :width="size" :height="size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- 圆形 -->
-      <circle v-if="type === 'circle'" :cx="12" :cy="12" :r="10" :fill="color" />
-      
-      <!-- 正方形 -->
-      <rect v-else-if="type === 'square'" x="4" y="4" width="16" height="16" :fill="color" rx="2" />
-      
-      <!-- 星形 -->
-      <polygon v-else-if="type === 'star'" :fill="color" points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
-      
-      <!-- 心形 -->
-      <path v-else-if="type === 'heart'" :fill="color" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
 
-    </svg>
-  `,
-      };
       const CalendarCell = {
         props: ["year", "month", "day", "markerType", "markerColor"],
         emits: ["openDrawer"],
@@ -50,12 +30,30 @@
               `CalendarCell_content_${props.year}_${props.month}_${props.day}`,
             "",
           );
+          // 新增：大弹窗的额外内容
+          const extraContent = storage.createDynamicStorage(
+            () =>
+              `CalendarCell_extra_${props.year}_${props.month}_${props.day}`,
+            "",
+          );
+
+          // 新增：控制弹窗显示
+          const showModal = ref(false);
           const openDrawer = () => {
             emit("openDrawer", props.day);
           };
-          return { content, openDrawer };
+          const handleLongPress = () => {
+            showModal.value = true;
+          };
+          return {
+            content,
+            extraContent,
+            showModal,
+            openDrawer,
+            handleLongPress,
+          };
         },
-        components: { CalendarMarker },
+        components: { CalendarMarker, LargeEditorModal },
         template: `
         
         <div class=" border rounded-lg p-2 bg-white text-center flex flex-col items-center">
@@ -64,7 +62,9 @@
                         {{ day }}
                         <calendar-marker v-if="markerType" :type="markerType" :color="markerColor" />
                     </div>
-                    <textarea class="w-full border rounded p-1" rows="3" v-model="content" style="resize:none"></textarea>
+                    <textarea class="w-full border rounded p-1" rows="3" v-model="content" style="resize:none"  v-longpress="handleLongPress"></textarea>
+                    <!-- 新增的大弹窗 -->
+      <large-editor-modal v-model="extraContent" :visible="showModal" @close="showModal = false" />
         </div>
             `,
       };
@@ -245,7 +245,7 @@
     </div>
   `,
       };
-      createApp({
+      const app = createApp({
         setup() {
           const year = ref(new Date().getFullYear());
           const month = ref(new Date().getMonth());
@@ -340,7 +340,9 @@
       @select="selectMarker"
     />
         `,
-      }).mount("#app");
+      });
+      app.directive("longpress", longpressDirective);
+      app.mount("#app");
     </script>
   </body>
 </html>
