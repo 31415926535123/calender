@@ -1,124 +1,346 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日历</title>
-    <style>
-      html,body{
-        width:100%;
-        height:100%;
-      }
-    
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    </style>
-      <link rel="manifest" href="manifest.json">
-        <script>
-    // 注册Service Worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js');
-    }
-  </script>
-</head>
-<body>
-<style>
-* {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none; /* 避免拖动按钮文字，提升美感 */
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3.4.21/dist/vue.esm-browser.js"
         }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
 
-.calendar-nav {
-  display: flex;
-  justify-content: space-between; /* 两个按钮左右两端对齐 */
-  align-items: center;
-  gap: 1rem;          /* 按钮之间的最小间距，防止靠太近 */
-  padding: 0.5rem 0;
-  margin-bottom: 1.5rem;
-}
+    <script type="module">
+      import { storage } from "./store.js";
+      import { createApp, ref, computed, watch } from "vue";
+      const CalendarMarker = {
+        props: {
+          type: { type: String, default: "circle" },
+          color: { type: String, default: "#000000" },
+          size: { type: Number, default: 16 },
+        },
+        template: `
+    <svg :width="size" :height="size" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- 圆形 -->
+      <circle v-if="type === 'circle'" :cx="12" :cy="12" :r="10" :fill="color" />
+      
+      <!-- 正方形 -->
+      <rect v-else-if="type === 'square'" x="4" y="4" width="16" height="16" :fill="color" rx="2" />
+      
+      <!-- 星形 -->
+      <polygon v-else-if="type === 'star'" :fill="color" points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
+      
+      <!-- 心形 -->
+      <path v-else-if="type === 'heart'" :fill="color" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
 
-/* 通用按钮样式 */
-.calendar-nav button {
-  background-color: #f0f0f0;      /* 浅灰背景 */
-  border: 1px solid #d1d5db;       /* 柔和边框 */
-  padding: 0.5rem 1.2rem;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #374151;
-  border-radius: 2rem;             /* 胶囊圆角，也可改为 0.5rem 更方正 */
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-width: 80px;                 /* 保证两个按钮宽度协调 */
-  text-align: center;
-}
+    </svg>
+  `,
+      };
+      const CalendarCell = {
+        props: ["year", "month", "day", "markerType", "markerColor"],
+        emits: ["openDrawer"],
+        setup(props, { emit }) {
+          const content = storage.createDynamicStorage(
+            () =>
+              `CalendarCell_content_${props.year}_${props.month}_${props.day}`,
+            "",
+          );
+          const openDrawer = () => {
+            emit("openDrawer", props.day);
+          };
+          return { content, openDrawer };
+        },
+        components: { CalendarMarker },
+        template: `
+        
+        <div class=" border rounded-lg p-2 bg-white text-center flex flex-col items-center">
 
-/* 悬停效果 */
-.calendar-nav button:hover {
-  background-color: #e5e7eb;
-  border-color: #9ca3af;
-  transform: translateY(-1px);
-}
+                    <div class="text-lg font-bold mb-2 flex items-center justify-center gap-1 w-full" @click="openDrawer">
+                        {{ day }}
+                        <calendar-marker v-if="markerType" :type="markerType" :color="markerColor" />
+                    </div>
+                    <textarea class="w-full border rounded p-1" rows="3" v-model="content" style="resize:none"></textarea>
+        </div>
+            `,
+      };
+      // 共享常量（放在组件定义之前）
+      const MARKER_SHAPES = [
+        { name: "圆形", type: "circle" },
+        { name: "正方形", type: "square" },
+        { name: "星形", type: "star" },
+        { name: "心形", type: "heart" },
+      ];
 
-/* 点击效果 */
-.calendar-nav button:active {
-  transform: translateY(1px);
-}
+      const DEFAULT_COLORS = [
+        { name: "红色", value: "#ef4444" },
+        { name: "蓝色", value: "#3b82f6" },
+        { name: "绿色", value: "#10b981" },
+        { name: "黄色", value: "#fbbf24" },
+        { name: "紫色", value: "#a855f7" },
+        { name: "粉色", value: "#ec4899" },
+        { name: "橙色", value: "#f97316" },
+        { name: "灰色", value: "#6b7280" },
+      ];
 
-  
-</style>
-<div>
-  <color-picker-menu></color-picker-menu>
-  
-  <div id="main">
-    <calendar-header id="header"></calendar-header>
-    <calendar-excel></calendar-excel>
-    <calendar-excel id="supplement"></calendar-excel>
-    <calendar-dates id="dates"></calendar-dates>
-  </div>
-  <div class="calendar-nav">
-    <button id="prev">上月</button>
-    <button id="next">下月</button>
-  </div>
+      // 底部抽屉组件
+      const BottomDrawer = {
+        props: {
+          visible: { type: Boolean, default: false },
+          currentDay: { type: Number, default: null },
+        },
+        emits: ["close", "select"],
+        setup(props, { emit }) {
+          const selectedShape = ref(MARKER_SHAPES[0]?.type || "circle");
+          const selectedColor = ref(DEFAULT_COLORS[0]?.value || "#ef4444");
+
+          const selectShape = (type) => {
+            selectedShape.value = type;
+          };
+
+          const selectColor = (color) => {
+            selectedColor.value = color;
+          };
+
+          const confirm = () => {
+            emit("select", {
+              day: props.currentDay,
+              type: selectedShape.value,
+              color: selectedColor.value,
+            });
+            emit("close");
+          };
+
+          const close = () => {
+            emit("close");
+          };
+
+          // 重置选择（每次打开时重置为默认值）
+          const reset = () => {
+            selectedShape.value = MARKER_SHAPES[0]?.type || "circle";
+            selectedColor.value = DEFAULT_COLORS[0]?.value || "#ef4444";
+          };
+
+          watch(
+            () => props.visible,
+            (newVal) => {
+              if (newVal) {
+                reset();
+              }
+            },
+          );
+
+          return {
+            MARKER_SHAPES,
+            DEFAULT_COLORS,
+            selectedShape,
+            selectedColor,
+            selectShape,
+            selectColor,
+            confirm,
+            close,
+          };
+        },
+        template: `
+    <div 
+      v-if="visible" 
+      class="fixed inset-0 z-50"
+      @click.self="close"
+    >
+      <!-- 遮罩层 -->
+      <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" @click="close"></div>
+      
+      <!-- 抽屉内容 -->
+      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl transform transition-transform">
+        <!-- 拖动条 -->
+        <div class="flex justify-center pt-3 pb-2">
+          <div class="w-12 h-1 bg-gray-300 rounded-full"></div>
+        </div>
+        
+        <!-- 标题 -->
+        <div class="px-5 pb-3 border-b">
+          <h3 class="text-lg font-semibold text-center">
+            为 {{ currentDay }} 号添加标记
+          </h3>
+          <p class="text-xs text-gray-400 text-center mt-1">点击单元格打开此面板</p>
+        </div>
+        
+        <!-- 图形选择 -->
+        <div class="px-5 py-4">
+          <p class="text-sm text-gray-600 mb-3">选择图形</p>
+          <div class="flex gap-4 justify-around">
+            <button
+              v-for="shape in MARKER_SHAPES"
+              :key="shape.type"
+              @click="selectShape(shape.type)"
+              :class="[
+                'w-12 h-12 rounded-full flex items-center justify-center transition-all',
+                selectedShape === shape.type ? 'bg-blue-100 ring-2 ring-blue-500' : 'bg-gray-100'
+              ]"
+            >
+              <!-- 使用 CalendarMarker 的图形预览 -->
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle v-if="shape.type === 'circle'" cx="12" cy="12" r="10" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" />
+                <rect v-else-if="shape.type === 'square'" x="4" y="4" width="16" height="16" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" rx="2" />
+                <polygon v-else-if="shape.type === 'star'" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
+                <path v-else-if="shape.type === 'heart'" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 颜色选择 -->
+        <div class="px-5 py-3">
+          <p class="text-sm text-gray-600 mb-3">选择颜色</p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button
+              v-for="color in DEFAULT_COLORS"
+              :key="color.value"
+              @click="selectColor(color.value)"
+              :class="[
+                'w-10 h-10 rounded-full transition-all',
+                selectedColor === color.value ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''
+              ]"
+              :style="{ backgroundColor: color.value }"
+              :title="color.name"
+            >
+            </button>
+          </div>
+        </div>
+        
+        <!-- 预览区域 -->
+        <div class="px-5 py-3 flex items-center justify-center gap-3 border-t border-b">
+          <span class="text-sm text-gray-600">预览：</span>
+          <div class="flex items-center gap-1">
+            <span class="text-lg font-bold">{{ currentDay }}</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle v-if="selectedShape === 'circle'" cx="12" cy="12" r="10" :fill="selectedColor" />
+              <rect v-else-if="selectedShape === 'square'" x="4" y="4" width="16" height="16" :fill="selectedColor" rx="2" />
+              <polygon v-else-if="selectedShape === 'star'" :fill="selectedColor" points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
+              <path v-else-if="selectedShape === 'heart'" :fill="selectedColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </div>
+        </div>
+        
+        <!-- 按钮 -->
+        <div class="p-5 flex gap-3">
+          <button 
+            @click="close"
+            class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium active:bg-gray-200 transition-colors"
+          >
+            取消
+          </button>
+          <button 
+            @click="confirm"
+            class="flex-1 py-3 rounded-xl bg-blue-500 text-white font-medium active:bg-blue-600 transition-colors"
+          >
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  `,
+      };
+      createApp({
+        setup() {
+          const year = ref(new Date().getFullYear());
+          const month = ref(new Date().getMonth());
+          const weekName = [
+            "周日",
+            "周一",
+            "周二",
+            "周三",
+            "周四",
+            "周五",
+            "周六",
+          ];
+          const markers = storage.createDynamicStorage(
+            () => `main_markers_${year.value}_${month.value}`,
+            {},
+          );
+          const firstDay = computed(() => {
+            console.log(markers.value);
+            return new Date(year.value, month.value, 1).getDay();
+          });
+          const days = computed(() => {
+            return new Date(year.value, month.value + 1, 0).getDate();
+          });
+
+          const drawerVisible = ref(false);
+          const currentDay = ref(null);
+          const openDrawer = (day) => {
+            currentDay.value = day; // 记录点击的日期
+            drawerVisible.value = true; // 显示抽屉
+          };
+
+          const closeDrawer = () => {
+            drawerVisible.value = false; // 隐藏抽屉
+            currentDay.value = null; // 清空记录的日期
+          };
+          const selectMarker = (markerData) => {
+            const newMarkers = { ...markers.value };
+            newMarkers[markerData.day] = {
+              type: markerData.type,
+              color: markerData.color,
+            };
+            markers.value = newMarkers; // 触发 setter → 保存到 localStorage
+          };
+          return {
+            year,
+            month,
+            days,
+            firstDay,
+            weekName,
+            markers,
+            drawerVisible,
+            currentDay,
+            openDrawer,
+            closeDrawer,
+            selectMarker,
+          };
+        },
+        components: { CalendarCell, BottomDrawer },
+        template: `<div class="text-center text-4xl flex items-center justify-center gap-8">
+  <button 
+    @click="month--; if(month < 0) { month = 11; year--; }"
+    class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-2xl font-bold"
+  >
+    ←
+  </button>
+  <span>{{year}}年{{month + 1}}月</span>
+  <button 
+    @click="month++; if(month > 11) { month = 0; year++; }"
+    class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-2xl font-bold"
+  >
+    →
+  </button>
 </div>
-<script type="module">
-  import "./color.js";
-  import "./date.js";
-  import "./header.js";
-  import "./excel.js";
-  let year = new Date().getFullYear();
-  let month = new Date().getMonth();
-  const con=[document.querySelector('calendar-header'),document.querySelector('calendar-dates')]
-  function update(obj,year,month){
-for (const i of obj ){
-  i.setDate(year,month);
-}
-  }
-  const prev=document.getElementById('prev');
-  const next=document.getElementById('next');
-  prev.addEventListener('click',()=>{
-if (month==0){
-  year-=1;month=11;
-}
-else{month-=1;}
-update(con,year,month);
-  })
-    next.addEventListener('click',()=>{
-if (month==11){
-  year+=1;month=0;
-}
-else{month+=1;}
-update(con,year,month);
-  })
-const supple=document.querySelector('#supplement');
-supple.readOnly=false;supple.render();
-for(let i=0;i<7;i++){supple.setCellValue(i,'');}
-</script>
+        <div class="grid grid-cols-7 gap-4">
+          <div v-for ="i in weekName" :key="i" class="text-center">
+            {{i}}
+            </div>
 
-</body>
+        <div v-for="i in firstDay" :key="i">
+          </div>
+
+          <template v-for="i in days" :key="i">
+        <CalendarCell :day="i" :year="year" :month="month"
+        :marker-type="markers[i]?.type"
+  :marker-color="markers[i]?.color"
+  @open-drawer="openDrawer"/></template>
+        </div>
+        <BottomDrawer 
+      :visible="drawerVisible"
+      :current-day="currentDay"
+      @close="closeDrawer"
+      @select="selectMarker"
+    />
+        `,
+      }).mount("#app");
+    </script>
+  </body>
 </html>

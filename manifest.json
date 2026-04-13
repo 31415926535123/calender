@@ -1,9 +1,10 @@
 {
   "name": "日历",
+  "version": "0.1",
   "short_name": "日历",
   "start_url": ".",
   "display": "standalone",
-  "id":"/",
+  "id": "/",
   "icons": [
     {
       "src": "icon.png",
