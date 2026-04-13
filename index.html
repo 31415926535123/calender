@@ -348,6 +348,40 @@
       });
       app.directive("longpress", longpressDirective);
       app.mount("#app");
+      // 检查是否触发了安装事件
+      window.addEventListener("beforeinstallprompt", (e) => {
+        console.log("🎉 安装提示触发！", e);
+        e.preventDefault();
+        // 保存事件供后续使用
+        window.deferredPrompt = e;
+
+        // 显示一个安装按钮
+        const btn = document.createElement("button");
+        btn.textContent = "安装应用";
+        btn.style.position = "fixed";
+        btn.style.bottom = "20px";
+        btn.style.right = "20px";
+        btn.style.zIndex = "9999";
+        btn.style.padding = "12px 24px";
+        btn.style.backgroundColor = "#4CAF50";
+        btn.style.color = "white";
+        btn.style.border = "none";
+        btn.style.borderRadius = "4px";
+        btn.onclick = () => {
+          e.prompt();
+          e.userChoice.then((choice) => {
+            console.log("用户选择:", choice.outcome);
+            btn.remove();
+          });
+        };
+        document.body.appendChild(btn);
+      });
+
+      // 检查当前状态
+      console.log(
+        "Service Worker 状态:",
+        navigator.serviceWorker.controller ? "已控制" : "未控制",
+      );
     </script>
   </body>
 </html>
