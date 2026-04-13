@@ -3,6 +3,7 @@
   "version": "0.1",
   "short_name": "日历",
   "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "id": "/",
   "icons": [
