@@ -1,7 +1,8 @@
-//longpress.js
+// longpress.js
 export default {
   mounted(el, binding) {
     let timer = null;
+    let isLongPressed = false; // 标记是否触发了长按
     const duration = typeof binding.value === "number" ? binding.value : 800;
     const handler =
       typeof binding.value === "function"
@@ -12,9 +13,10 @@ export default {
       // 只响应鼠标左键或触摸
       if (e.button !== undefined && e.button !== 0) return;
 
-      e.preventDefault(); // 阻止右键菜单/长按菜单
+      isLongPressed = false;
 
       timer = setTimeout(() => {
+        isLongPressed = true;
         handler?.();
       }, duration);
     };
@@ -28,10 +30,23 @@ export default {
       }
     };
 
-    const cancel = () => {
+    const cancel = (e) => {
       if (timer) {
         clearTimeout(timer);
         timer = null;
+      }
+      // 如果是长按触发了，阻止后续的 click 事件
+      if (isLongPressed && e.type === "pointerup") {
+        e.stopPropagation?.();
+      }
+    };
+
+    // 全局阻止 click 的辅助函数（通过事件捕获）
+    const preventClickIfLongPress = (e) => {
+      if (isLongPressed) {
+        e.stopPropagation();
+        // 重置标记，避免影响下次点击
+        isLongPressed = false;
       }
     };
 
@@ -39,12 +54,15 @@ export default {
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", cancel);
     el.addEventListener("pointercancel", cancel);
+    // 在捕获阶段拦截 click 事件
+    el.addEventListener("click", preventClickIfLongPress, true);
 
     el._longpressCleanup = () => {
       el.removeEventListener("pointerdown", start);
       el.removeEventListener("pointermove", move);
       el.removeEventListener("pointerup", cancel);
       el.removeEventListener("pointercancel", cancel);
+      el.removeEventListener("click", preventClickIfLongPress, true);
     };
   },
 
