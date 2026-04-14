@@ -23,56 +23,10 @@
     <script type="module">
       import longpressDirective from "./longpress.js";
       import { LargeEditorModal, CalendarMarker } from "./utils.js";
+      import { CalendarCell } from "./calendarcell.js";
       import { storage } from "./store.js";
       import { createApp, ref, computed, watch } from "vue";
 
-      const CalendarCell = {
-        props: ["year", "month", "day", "markerType", "markerColor"],
-        emits: ["openDrawer"],
-        setup(props, { emit }) {
-          const content = storage.createDynamicStorage(
-            () =>
-              `CalendarCell_content_${props.year}_${props.month}_${props.day}`,
-            "",
-          );
-          // 新增：大弹窗的额外内容
-          const extraContent = storage.createDynamicStorage(
-            () =>
-              `CalendarCell_extra_${props.year}_${props.month}_${props.day}`,
-            "",
-          );
-
-          // 新增：控制弹窗显示
-          const showModal = ref(false);
-          const openDrawer = () => {
-            emit("openDrawer", props.day);
-          };
-          const handleLongPress = () => {
-            showModal.value = true;
-          };
-          return {
-            content,
-            extraContent,
-            showModal,
-            openDrawer,
-            handleLongPress,
-          };
-        },
-        components: { CalendarMarker, LargeEditorModal },
-        template: `
-        
-        <div class=" border rounded-lg p-2 bg-white text-center flex flex-col items-center">
-
-                    <div class="text-lg font-bold mb-2 flex items-center justify-center gap-1 w-full" @click="openDrawer">
-                        {{ day }}
-                        <calendar-marker v-if="markerType" :type="markerType" :color="markerColor" />
-                    </div>
-                    <textarea class="w-full border rounded p-1" rows="3" v-model="content" style="resize:none"  v-longpress="handleLongPress"></textarea>
-                    <!-- 新增的大弹窗 -->
-      <large-editor-modal v-model="extraContent" :visible="showModal" @close="showModal = false" />
-        </div>
-            `,
-      };
       // 共享常量（放在组件定义之前）
       const MARKER_SHAPES = [
         { name: "圆形", type: "circle" },
@@ -288,11 +242,32 @@
           };
           const selectMarker = (markerData) => {
             const newMarkers = { ...markers.value };
-            newMarkers[markerData.day] = {
-              type: markerData.type,
-              color: markerData.color,
-            };
-            markers.value = newMarkers; // 触发 setter → 保存到 localStorage
+            // 如果同一天已有标记，则追加到数组
+            if (newMarkers[markerData.day]) {
+              // 如果已经是数组就追加，否则转为数组
+              if (Array.isArray(newMarkers[markerData.day])) {
+                newMarkers[markerData.day] = [
+                  ...newMarkers[markerData.day],
+                  {
+                    type: markerData.type,
+                    color: markerData.color,
+                  },
+                ];
+              } else {
+                newMarkers[markerData.day] = [
+                  newMarkers[markerData.day],
+                  { type: markerData.type, color: markerData.color },
+                ];
+              }
+            } else {
+              newMarkers[markerData.day] = [
+                {
+                  type: markerData.type,
+                  color: markerData.color,
+                },
+              ];
+            }
+            markers.value = newMarkers;
           };
           return {
             year,
@@ -333,10 +308,13 @@
           </div>
 
           <template v-for="i in days" :key="i">
-        <CalendarCell :day="i" :year="year" :month="month"
-        :marker-type="markers[i]?.type"
-  :marker-color="markers[i]?.color"
-  @open-drawer="openDrawer"/></template>
+        <CalendarCell 
+  :day="i" 
+  :year="year" 
+  :month="month"
+  :markers="markers[i]"
+  @open-drawer="openDrawer"
+/></template>
         </div>
         <BottomDrawer 
       :visible="drawerVisible"
