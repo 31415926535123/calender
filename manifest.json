@@ -4,7 +4,7 @@
   "short_name": "日历",
   "start_url": ".",
   "scope": ".",
-  "display": "standalone",
+  "display": "fullscreen",
   "id": "/",
   "icons": [
     {
