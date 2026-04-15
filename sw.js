@@ -1,5 +1,5 @@
 // sw.js - 极简版本，解决超时问题
-const CACHE_NAME = "v0.0.4";
+const CACHE_NAME = "v0.0.5";
 
 // 立即执行，避免任何耗时操作
 self.addEventListener("install", (event) => {
