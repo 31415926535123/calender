@@ -12,11 +12,11 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./tailwindcss.js"></script>
     <script type="importmap">
       {
         "imports": {
-          "vue": "https://unpkg.com/vue@3.4.21/dist/vue.esm-browser.js"
+          "vue": "./vue.js"
         }
       }
     </script>
@@ -26,184 +26,7 @@
       import { CalendarCell } from "./calendarcell.js";
       import { storage } from "./store.js";
       import { createApp, ref, computed, watch } from "vue";
-
-      // 共享常量（放在组件定义之前）
-      const MARKER_SHAPES = [
-        { name: "圆形", type: "circle" },
-        { name: "正方形", type: "square" },
-        { name: "星形", type: "star" },
-        { name: "心形", type: "heart" },
-      ];
-
-      const DEFAULT_COLORS = [
-        { name: "红色", value: "#ef4444" },
-        { name: "蓝色", value: "#3b82f6" },
-        { name: "绿色", value: "#10b981" },
-        { name: "黄色", value: "#fbbf24" },
-        { name: "紫色", value: "#a855f7" },
-        { name: "粉色", value: "#ec4899" },
-        { name: "橙色", value: "#f97316" },
-        { name: "灰色", value: "#6b7280" },
-      ];
-
-      // 底部抽屉组件
-      const BottomDrawer = {
-        props: {
-          visible: { type: Boolean, default: false },
-          currentDay: { type: Number, default: null },
-        },
-        emits: ["close", "select"],
-        setup(props, { emit }) {
-          const selectedShape = ref(MARKER_SHAPES[0]?.type || "circle");
-          const selectedColor = ref(DEFAULT_COLORS[0]?.value || "#ef4444");
-
-          const selectShape = (type) => {
-            selectedShape.value = type;
-          };
-
-          const selectColor = (color) => {
-            selectedColor.value = color;
-          };
-
-          const confirm = () => {
-            emit("select", {
-              day: props.currentDay,
-              type: selectedShape.value,
-              color: selectedColor.value,
-            });
-            emit("close");
-          };
-
-          const close = () => {
-            emit("close");
-          };
-
-          // 重置选择（每次打开时重置为默认值）
-          const reset = () => {
-            selectedShape.value = MARKER_SHAPES[0]?.type || "circle";
-            selectedColor.value = DEFAULT_COLORS[0]?.value || "#ef4444";
-          };
-
-          watch(
-            () => props.visible,
-            (newVal) => {
-              if (newVal) {
-                reset();
-              }
-            },
-          );
-
-          return {
-            MARKER_SHAPES,
-            DEFAULT_COLORS,
-            selectedShape,
-            selectedColor,
-            selectShape,
-            selectColor,
-            confirm,
-            close,
-          };
-        },
-        template: `
-    <div 
-      v-if="visible" 
-      class="fixed inset-0 z-50"
-      @click.self="close"
-    >
-      <!-- 遮罩层 -->
-      <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" @click="close"></div>
-      
-      <!-- 抽屉内容 -->
-      <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-xl transform transition-transform">
-        <!-- 拖动条 -->
-        <div class="flex justify-center pt-3 pb-2">
-          <div class="w-12 h-1 bg-gray-300 rounded-full"></div>
-        </div>
-        
-        <!-- 标题 -->
-        <div class="px-5 pb-3 border-b">
-          <h3 class="text-lg font-semibold text-center">
-            为 {{ currentDay }} 号添加标记
-          </h3>
-          <p class="text-xs text-gray-400 text-center mt-1">点击单元格打开此面板</p>
-        </div>
-        
-        <!-- 图形选择 -->
-        <div class="px-5 py-4">
-          <p class="text-sm text-gray-600 mb-3">选择图形</p>
-          <div class="flex gap-4 justify-around">
-            <button
-              v-for="shape in MARKER_SHAPES"
-              :key="shape.type"
-              @click="selectShape(shape.type)"
-              :class="[
-                'w-12 h-12 rounded-full flex items-center justify-center transition-all',
-                selectedShape === shape.type ? 'bg-blue-100 ring-2 ring-blue-500' : 'bg-gray-100'
-              ]"
-            >
-              <!-- 使用 CalendarMarker 的图形预览 -->
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle v-if="shape.type === 'circle'" cx="12" cy="12" r="10" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" />
-                <rect v-else-if="shape.type === 'square'" x="4" y="4" width="16" height="16" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" rx="2" />
-                <polygon v-else-if="shape.type === 'star'" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
-                <path v-else-if="shape.type === 'heart'" :fill="selectedShape === shape.type ? '#3b82f6' : '#9ca3af'" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        <!-- 颜色选择 -->
-        <div class="px-5 py-3">
-          <p class="text-sm text-gray-600 mb-3">选择颜色</p>
-          <div class="flex flex-wrap gap-3 justify-center">
-            <button
-              v-for="color in DEFAULT_COLORS"
-              :key="color.value"
-              @click="selectColor(color.value)"
-              :class="[
-                'w-10 h-10 rounded-full transition-all',
-                selectedColor === color.value ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''
-              ]"
-              :style="{ backgroundColor: color.value }"
-              :title="color.name"
-            >
-            </button>
-          </div>
-        </div>
-        
-        <!-- 预览区域 -->
-        <div class="px-5 py-3 flex items-center justify-center gap-3 border-t border-b">
-          <span class="text-sm text-gray-600">预览：</span>
-          <div class="flex items-center gap-1">
-            <span class="text-lg font-bold">{{ currentDay }}</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <circle v-if="selectedShape === 'circle'" cx="12" cy="12" r="10" :fill="selectedColor" />
-              <rect v-else-if="selectedShape === 'square'" x="4" y="4" width="16" height="16" :fill="selectedColor" rx="2" />
-              <polygon v-else-if="selectedShape === 'star'" :fill="selectedColor" points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" />
-              <path v-else-if="selectedShape === 'heart'" :fill="selectedColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-            </svg>
-          </div>
-        </div>
-        
-        <!-- 按钮 -->
-        <div class="p-5 flex gap-3">
-          <button 
-            @click="close"
-            class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium active:bg-gray-200 transition-colors"
-          >
-            取消
-          </button>
-          <button 
-            @click="confirm"
-            class="flex-1 py-3 rounded-xl bg-blue-500 text-white font-medium active:bg-blue-600 transition-colors"
-          >
-            确定
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
-      };
+      import { BottomDrawer } from "./bottomdrawer.js";
       const app = createApp({
         setup() {
           const year = ref(new Date().getFullYear());
@@ -241,24 +64,20 @@
             currentDay.value = null; // 清空记录的日期
           };
           const selectMarker = (markerData) => {
+            if (markers.value[markerData.day]?.length >= 4) {
+              alert("超过可选上限");
+              return;
+            }
             const newMarkers = { ...markers.value };
             // 如果同一天已有标记，则追加到数组
             if (newMarkers[markerData.day]) {
-              // 如果已经是数组就追加，否则转为数组
-              if (Array.isArray(newMarkers[markerData.day])) {
-                newMarkers[markerData.day] = [
-                  ...newMarkers[markerData.day],
-                  {
-                    type: markerData.type,
-                    color: markerData.color,
-                  },
-                ];
-              } else {
-                newMarkers[markerData.day] = [
-                  newMarkers[markerData.day],
-                  { type: markerData.type, color: markerData.color },
-                ];
-              }
+              newMarkers[markerData.day] = [
+                ...newMarkers[markerData.day],
+                {
+                  type: markerData.type,
+                  color: markerData.color,
+                },
+              ];
             } else {
               newMarkers[markerData.day] = [
                 {
@@ -267,6 +86,10 @@
                 },
               ];
             }
+            markers.value = newMarkers;
+          };
+          const handleUpdateMarkers = (newMarkers) => {
+            // 接收删除后的新数据
             markers.value = newMarkers;
           };
           return {
@@ -281,6 +104,7 @@
             openDrawer,
             closeDrawer,
             selectMarker,
+            handleUpdateMarkers,
           };
         },
         components: { CalendarCell, BottomDrawer },
@@ -319,8 +143,10 @@
         <BottomDrawer 
       :visible="drawerVisible"
       :current-day="currentDay"
+      :markers=markers
       @close="closeDrawer"
       @select="selectMarker"
+          @update:markers="handleUpdateMarkers"
     />
         `,
       });

@@ -42,7 +42,7 @@ export const CalendarCell = {
       
       <div class="flex justify-center items-center">
       <template v-for="(marker,i) in markers" :key="i">
-        <calendar-marker v-if="i<2" :marker="marker" />
+        <calendar-marker   v-if="i>1 && i<4" :marker="marker" />
         </template>
       </div>
       <!-- 数字居中 -->
@@ -53,7 +53,7 @@ export const CalendarCell = {
       <!-- 右侧实际标记 -->
       <div class="flex justify-center items-center">
         <template v-for="(marker,i) in markers" :key="i">
-        <calendar-marker v-if="i>1 && i<4" :marker="marker" />
+        <calendar-marker v-if="i<2" :marker="marker" />
         </template>
       </div>
     </div>
