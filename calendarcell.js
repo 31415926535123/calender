@@ -36,9 +36,20 @@ export const CalendarCell = {
         
         <div class=" border rounded-lg p-2 bg-white text-center flex flex-col items-center">
 
-                    <div class="text-lg font-bold mb-2 flex items-center justify-center gap-1 w-full" @click="openDrawer">
-                        {{ day }}
-                        <calendar-marker v-if="markers" :markers="markers" />
+                    <div class="text-lg relative text-center font-bold mb-2 gap-1 w-full flex items-center justify-center" @click="openDrawer">
+                         <!-- 左侧占位符（透明，保持平衡） -->
+    <div class="invisible w-[40px] flex-shrink-0">
+      <calendar-marker v-if="markers" :markers="markers" />
+    </div>
+    
+    <!-- 数字绝对居中 -->
+    <span class="text-center px-1">{{ day }}</span>
+    
+    <!-- 右侧实际显示的标记 -->
+    <div class="w-[40px] flex-shrink-0 flex justify-start">
+      <calendar-marker v-if="markers" :markers="markers" />
+      <span v-else class="text-xs text-gray-400"></span>
+    </div>
                     </div>
                     <textarea class="w-full border rounded p-1" rows="3" v-model="content" style="resize:none"  v-longpress="handleLongPress"></textarea>
                     <!-- 新增的大弹窗 -->
