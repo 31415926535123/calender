@@ -37,19 +37,19 @@ export const CalendarCell = {
         <div class=" border rounded-lg p-0 bg-white text-center flex flex-col items-center">
 
                       <div class="text-lg font-bold mb-2 w-full" @click="openDrawer">
-    <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full overflow:hidden" style="max-width: 100%">
-      <!-- 左侧占位（不可见） -->
-      <div class="invisible flex justify-end" >
+    <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full overflow:hidden">
+      <!-- 左侧 -->
+      <div class="flex justify-center items-center">
+        <calendar-marker v-if="markers" :markers="markers" :maxMarkers="2" />
       </div>
-      
       <!-- 数字居中 -->
-      <div class="text-center">
+      <div class="flex justify-center items-center">
         {{ day }}
       </div>
       
       <!-- 右侧实际标记 -->
-      <div class="flex justify-start" style="max-width: 40%">
-        <calendar-marker v-if="markers" :markers="markers" />
+      <div class="flex justify-center items-center">
+        <calendar-marker v-if="markers" :markers="markers" :maxMarkers="2" />
       </div>
     </div>
                     </div>
