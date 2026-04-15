@@ -39,8 +39,11 @@ export const CalendarCell = {
                       <div class="text-lg font-bold mb-2 w-full" @click="openDrawer">
     <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full overflow:hidden">
       <!-- 左侧 -->
+      
       <div class="flex justify-center items-center">
-        <calendar-marker v-if="markers" :markers="markers" :maxMarkers="2" />
+      <template v-for="(marker,i) in markers" :key="i">
+        <calendar-marker v-if="i<2" :marker="marker" />
+        </template>
       </div>
       <!-- 数字居中 -->
       <div class="flex justify-center items-center">
@@ -49,7 +52,9 @@ export const CalendarCell = {
       
       <!-- 右侧实际标记 -->
       <div class="flex justify-center items-center">
-        <calendar-marker v-if="markers" :markers="markers" :maxMarkers="2" />
+        <template v-for="(marker,i) in markers" :key="i">
+        <calendar-marker v-if="i>1 && i<4" :marker="marker" />
+        </template>
       </div>
     </div>
                     </div>
