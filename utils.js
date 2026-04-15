@@ -71,19 +71,20 @@ export const CalendarMarker = {
     markers: {
       type: Array,
       default: () => [],
-      // markers 格式: [{ type: "circle", color: "#FF6B6B" }, ...]
     },
     size: { type: Number, default: 16 },
+    maxMarkers: { type: Number, default: 3 }, // 最多显示数量
   },
   template: `
-    <div class="calendar-markers-wrapper" style="display: inline-flex; gap: 4px; align-items: center;">
+    <div class="calendar-markers-wrapper w-full" style="display: inline-flex; align-items: center; min-width: 0;">
       <svg 
-        v-for="(marker, idx) in markers" 
+        v-for="(marker, idx) in displayMarkers" 
         :key="idx"
         :width="size" 
         :height="size" 
         viewBox="0 0 24 24" 
         fill="none"
+        style="flex-shrink: 0; display: block; min-width: 0;"
       >
         <circle v-if="marker.type === 'circle'" :cx="12" :cy="12" :r="10" :fill="marker.color" />
         <rect v-else-if="marker.type === 'square'" x="4" y="4" width="16" height="16" :fill="marker.color" rx="2" />
@@ -92,4 +93,9 @@ export const CalendarMarker = {
       </svg>
     </div>
   `,
+  computed: {
+    displayMarkers() {
+      return this.markers.slice(0, this.maxMarkers);
+    },
+  },
 };

@@ -34,21 +34,23 @@ export const CalendarCell = {
   components: { CalendarMarker, LargeEditorModal },
   template: `
         
-        <div class=" border rounded-lg p-2 bg-white text-center flex flex-col items-center">
+        <div class=" border rounded-lg p-0 bg-white text-center flex flex-col items-center">
 
-                    <div class="text-lg relative text-center font-bold mb-2 gap-1 w-full flex items-center justify-center" @click="openDrawer">
-                         <!-- 左侧占位符（透明，保持平衡） -->
-    <div class="invisible w-[40px] flex-shrink-0">
-      <calendar-marker v-if="markers" :markers="markers" />
-    </div>
-    
-    <!-- 数字绝对居中 -->
-    <span class="text-center px-1">{{ day }}</span>
-    
-    <!-- 右侧实际显示的标记 -->
-    <div class="w-[40px] flex-shrink-0 flex justify-start">
-      <calendar-marker v-if="markers" :markers="markers" />
-      <span v-else class="text-xs text-gray-400"></span>
+                      <div class="text-lg font-bold mb-2 w-full" @click="openDrawer">
+    <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full overflow:hidden" style="max-width: 100%">
+      <!-- 左侧占位（不可见） -->
+      <div class="invisible flex justify-end" >
+      </div>
+      
+      <!-- 数字居中 -->
+      <div class="text-center">
+        {{ day }}
+      </div>
+      
+      <!-- 右侧实际标记 -->
+      <div class="flex justify-start" style="max-width: 40%">
+        <calendar-marker v-if="markers" :markers="markers" />
+      </div>
     </div>
                     </div>
                     <textarea class="w-full border rounded p-1" rows="3" v-model="content" style="resize:none"  v-longpress="handleLongPress"></textarea>
