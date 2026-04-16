@@ -78,28 +78,34 @@
             currentDay.value = null; // 清空记录的日期
           };
           const selectMarker = (markerData) => {
-            if (markers.value[markerData.day]?.length >= 4) {
+            const newMarkers = { ...markers.value };
+            const data = newMarkers[markerData.day];
+            if (!data) {
+              newMarkers[markerData.day] = [
+                {
+                  type: markerData.type,
+                  color: markerData.color,
+                },
+              ];
+              markers.value = newMarkers;
+              return;
+            }
+            if (data.length >= 4) {
               alert("超过可选上限");
               return;
             }
-            const newMarkers = { ...markers.value };
-            // 如果同一天已有标记，则追加到数组
-            if (newMarkers[markerData.day]) {
-              newMarkers[markerData.day] = [
-                ...newMarkers[markerData.day],
-                {
-                  type: markerData.type,
-                  color: markerData.color,
-                },
-              ];
-            } else {
-              newMarkers[markerData.day] = [
-                {
-                  type: markerData.type,
-                  color: markerData.color,
-                },
-              ];
+            for (const i of data) {
+              if (i.type === markerData.type && i.color == markerData.color) {
+                alert("相同图形重复");
+                return;
+              }
             }
+
+            data.push({
+              type: markerData.type,
+              color: markerData.color,
+            });
+
             markers.value = newMarkers;
           };
           const handleUpdateMarkers = (newMarkers) => {

@@ -40,7 +40,7 @@ export const CalendarCell = {
     <div class="grid grid-cols-[1fr_auto_1fr] items-center w-full overflow:hidden">
       <!-- 左侧 -->
       
-      <div class="flex justify-center items-center">
+      <div class="flex justify-center items-start">
       <template v-for="(marker,i) in markers" :key="i">
         <calendar-marker   v-if="i>1 && i<4" :marker="marker" />
         </template>
@@ -51,10 +51,9 @@ export const CalendarCell = {
       </div>
       
       <!-- 右侧实际标记 -->
-      <div class="flex justify-center items-center">
-        <template v-for="(marker,i) in markers" :key="i">
-        <calendar-marker v-if="i<2" :marker="marker" />
-        </template>
+      <div class="flex justify-center items-end">
+        <calendar-marker v-if="markers&&markers[1]" :marker="markers[1]" />
+<calendar-marker v-if="markers&&markers[0]" :marker="markers[0]" />
       </div>
     </div>
                     </div>
