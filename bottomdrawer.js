@@ -36,7 +36,7 @@ export const BottomDrawer = {
   props: {
     visible: { type: Boolean, default: false },
     currentDay: { type: Number, default: null },
-    markers: { type: Array, default: [] },
+    markers: { type: Object, default: {} },
   },
   emits: ["close", "select", "update:markers"],
   setup(props, { emit }) {
@@ -154,6 +154,12 @@ export const BottomDrawer = {
         <!-- 拖动条 -->
         <div class="flex justify-center pt-3 pb-2 sticky top-0 bg-white z-10">
           <div class="w-12 h-1 bg-gray-300 rounded-full"></div>
+              <button 
+      @click="close"
+      class="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8  text-gray-700 font-medium flex items-center justify-center hover:bg-gray-200"
+    >
+      ✕
+    </button>
         </div>
         
         <!-- 标题 -->
@@ -216,7 +222,14 @@ export const BottomDrawer = {
             </svg>
           </div>
         </div>
-        
+        <div>
+        <button 
+            @click="confirm"
+            class="w-full py-3 rounded-xl bg-blue-500 text-white font-medium active:bg-blue-600 transition-colors"
+          >
+            添加
+          </button>
+        </div>
         <!-- 已有标记显示区域 -->
         <div v-if="hasMarkers" class="px-5 py-4 border-t">
           <div class="flex justify-between items-center mb-3">
@@ -245,22 +258,11 @@ export const BottomDrawer = {
           </div>
           <p class="text-xs text-gray-400 text-center mt-2">共 {{ currentDayMarkers.length }} 个标记</p>
         </div>
-        
-        <!-- 按钮 -->
-        <div class="p-5 flex gap-3 sticky bottom-0 bg-white border-t">
-          <button 
-            @click="close"
-            class="flex-1 py-3 rounded-xl bg-gray-100 text-gray-700 font-medium active:bg-gray-200 transition-colors"
-          >
-            取消
-          </button>
-          <button 
-            @click="confirm"
-            class="flex-1 py-3 rounded-xl bg-blue-500 text-white font-medium active:bg-blue-600 transition-colors"
-          >
-            确定
-          </button>
-        </div>
+
+
+
+
+
       </div>
     </div>
   `,
