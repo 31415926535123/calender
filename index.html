@@ -136,36 +136,9 @@
 <div class="fixed top-4 right-4 z-50">
   <div @click="toggleAvatarUploader" class="cursor-pointer">
     <ImageUploader 
-      :show-upload-area="false"
-      :show-info-panel="false"
-      :show-delete-button="false"
       :size="50"
-      position="custom"
-      :custom-position="{ top: '0px', right: '0px' }"
       @uploaded="handleAvatarUploaded"
     />
-  </div>
-</div>
-
-<!-- 头像切换弹窗（可选，显示完整上传界面） -->
-<div v-if="showAvatarUploader" 
-     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
-     @click="showAvatarUploader = false">
-  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4" @click.stop>
-    <h3 class="text-xl font-bold mb-4 text-center">更换头像</h3>
-    <ImageUploader 
-      :show-upload-area="true"
-      :show-info-panel="true"
-      :show-delete-button="true"
-      :size="80"
-      position="custom"
-      :custom-position="{ position: 'relative', top: '0', left: '0' }"
-      @uploaded="handleAvatarUploaded"
-      @deleted="handleAvatarUploaded"
-    />
-    <button class="mt-4 w-full px-4 py-2 bg-gray-200 rounded-lg" @click="showAvatarUploader = false">
-      取消
-    </button>
   </div>
 </div>
         
