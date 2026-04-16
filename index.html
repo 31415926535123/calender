@@ -21,6 +21,8 @@
       }
     </script>
     <script type="module">
+      // 在现有的 import 后面添加
+      import ImageUploader from "./avatar.js";
       import longpressDirective from "./longpress.js";
       import { LargeEditorModal, CalendarMarker } from "./utils.js";
       import { CalendarCell } from "./calendarcell.js";
@@ -29,6 +31,18 @@
       import { BottomDrawer } from "./bottomdrawer.js";
       const app = createApp({
         setup() {
+          const showAvatarUploader = ref(false);
+
+          // 切换头像上传器显示/隐藏
+          const toggleAvatarUploader = () => {
+            showAvatarUploader.value = !showAvatarUploader.value;
+          };
+
+          // 处理头像上传成功
+          const handleAvatarUploaded = (imageData) => {
+            showAvatarUploader.value = false;
+            console.log("头像更新成功", imageData);
+          };
           const year = ref(new Date().getFullYear());
           const month = ref(new Date().getMonth());
           const weekName = [
@@ -105,10 +119,51 @@
             closeDrawer,
             selectMarker,
             handleUpdateMarkers,
+            showAvatarUploader,
+            toggleAvatarUploader,
+            handleAvatarUploaded,
           };
         },
-        components: { CalendarCell, BottomDrawer },
-        template: `<div class="text-center text-4xl flex items-center justify-center gap-8 mb-16 mt-16">
+        components: { CalendarCell, BottomDrawer, ImageUploader },
+        template: `
+        <!-- 右上角圆形头像 -->
+<div class="fixed top-4 right-4 z-50">
+  <div @click="toggleAvatarUploader" class="cursor-pointer">
+    <ImageUploader 
+      :show-upload-area="false"
+      :show-info-panel="false"
+      :show-delete-button="false"
+      :size="50"
+      position="custom"
+      :custom-position="{ top: '0px', right: '0px' }"
+      @uploaded="handleAvatarUploaded"
+    />
+  </div>
+</div>
+
+<!-- 头像切换弹窗（可选，显示完整上传界面） -->
+<div v-if="showAvatarUploader" 
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+     @click="showAvatarUploader = false">
+  <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4" @click.stop>
+    <h3 class="text-xl font-bold mb-4 text-center">更换头像</h3>
+    <ImageUploader 
+      :show-upload-area="true"
+      :show-info-panel="true"
+      :show-delete-button="true"
+      :size="80"
+      position="custom"
+      :custom-position="{ position: 'relative', top: '0', left: '0' }"
+      @uploaded="handleAvatarUploaded"
+      @deleted="handleAvatarUploaded"
+    />
+    <button class="mt-4 w-full px-4 py-2 bg-gray-200 rounded-lg" @click="showAvatarUploader = false">
+      取消
+    </button>
+  </div>
+</div>
+        
+        <div class="text-center text-4xl flex items-center justify-center gap-8 mb-16 mt-16">
   <button 
     @click="month--; if(month < 0) { month = 11; year--; }"
     class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-2xl font-bold"
