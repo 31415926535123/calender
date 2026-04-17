@@ -132,16 +132,11 @@
         },
         components: { CalendarCell, BottomDrawer, ImageUploader },
         template: `
-        <!-- 右上角圆形头像 -->
-<div class="fixed top-4 right-4 z-50">
-  <div @click="toggleAvatarUploader" class="cursor-pointer">
+        <!-- 圆形头像 -->
     <ImageUploader 
-      :size="50"
       @uploaded="handleAvatarUploaded"
+      @click="toggleAvatarUploader"
     />
-  </div>
-</div>
-        
         <div class="text-center text-4xl flex items-center justify-center gap-8 mb-16 mt-16">
   <button 
     @click="month--; if(month < 0) { month = 11; year--; }"
