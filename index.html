@@ -29,6 +29,7 @@
       import { storage } from "./store.js";
       import { createApp, ref, computed, watch } from "vue";
       import { BottomDrawer } from "./bottomdrawer.js";
+      import globalText from "./locales/text.js";
       const app = createApp({
         setup() {
           const showAvatarUploader = ref(false);
@@ -41,19 +42,19 @@
           // 处理头像上传成功
           const handleAvatarUploaded = (imageData) => {
             showAvatarUploader.value = false;
-            console.log("头像更新成功", imageData);
+            console.log(globalText.avatar.updateSuccess, imageData);
           };
           const year = ref(new Date().getFullYear());
           const month = ref(new Date().getMonth());
-          const weekName = [
-            "周日",
-            "周一",
-            "周二",
-            "周三",
-            "周四",
-            "周五",
-            "周六",
-          ];
+          const weekName = computed(() => [
+            globalText.week.sunday,
+            globalText.week.monday,
+            globalText.week.tuesday,
+            globalText.week.wednesday,
+            globalText.week.thursday,
+            globalText.week.friday,
+            globalText.week.saturday,
+          ]);
           const markers = storage.createDynamicStorage(
             () => `main_markers_${year.value}_${month.value}`,
             {},
@@ -91,12 +92,12 @@
               return;
             }
             if (data.length >= 4) {
-              alert("超过可选上限");
+              alert(globalText.alert.maxMarkers);
               return;
             }
             for (const i of data) {
               if (i.type === markerData.type && i.color == markerData.color) {
-                alert("相同图形重复");
+                alert(globalText.alert.duplicateMarker);
                 return;
               }
             }
@@ -128,6 +129,7 @@
             showAvatarUploader,
             toggleAvatarUploader,
             handleAvatarUploaded,
+            globalText,
           };
         },
         components: { CalendarCell, BottomDrawer, ImageUploader },
@@ -142,14 +144,14 @@
     @click="month--; if(month < 0) { month = 11; year--; }"
     class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-2xl font-bold"
   >
-    ←
+    {{ globalText.header.prevMonth }}
   </button>
-  <span>{{year}}年{{month + 1}}月</span>
+  <span>{{ globalText.header.title.replace("{year}", year).replace("{month}", month + 1) }}</span>
   <button 
     @click="month++; if(month > 11) { month = 0; year++; }"
     class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-colors text-2xl font-bold"
   >
-    →
+    {{ globalText.header.nextMonth }}
   </button>
 </div>
         <div class="grid grid-cols-7 gap-1">

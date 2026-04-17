@@ -1,4 +1,5 @@
 import { ref, watch, computed } from "vue";
+import globalText from "./locales/text.js";
 const MARKER_SHAPES = [
   {
     type: "circle",
@@ -138,6 +139,7 @@ export const BottomDrawer = {
       currentDayMarkers,
       hasMarkers,
       deleteMarker,
+      globalText,
     };
   },
   template: `
@@ -158,21 +160,21 @@ export const BottomDrawer = {
       @click="close"
       class="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8  text-gray-700 font-medium flex items-center justify-center hover:bg-gray-200"
     >
-      ✕
+      {{ globalText.common.close }}
     </button>
         </div>
         
         <!-- 标题 -->
         <div class="px-5 pb-3 border-b">
           <h3 class="text-lg font-semibold text-center">
-            为 {{ currentDay }} 号添加标记
+            {{ globalText.drawer.title.replace("{day}", currentDay) }}
           </h3>
-          <p class="text-xs text-gray-400 text-center mt-1">点击单元格打开此面板</p>
+          <p class="text-xs text-gray-400 text-center mt-1">{{ globalText.drawer.subtitle }}</p>
         </div>
         
         <!-- 图形选择 -->
         <div class="px-5 py-4">
-          <p class="text-sm text-gray-600 mb-3">选择图形</p>
+          <p class="text-sm text-gray-600 mb-3">{{ globalText.drawer.selectShape }}</p>
           <div class="flex gap-4 justify-around">
             <button
               v-for="shape in MARKER_SHAPES"
@@ -194,7 +196,7 @@ export const BottomDrawer = {
         
         <!-- 颜色选择 -->
         <div class="px-5 py-3">
-          <p class="text-sm text-gray-600 mb-3">选择颜色</p>
+          <p class="text-sm text-gray-600 mb-3">{{ globalText.drawer.selectColor }}</p>
           <div class="flex flex-wrap gap-3 justify-center">
             <button
               v-for="color in DEFAULT_COLORS"
@@ -213,7 +215,7 @@ export const BottomDrawer = {
         
         <!-- 预览区域 -->
         <div class="px-5 py-3 flex items-center justify-center gap-3 border-t border-b">
-          <span class="text-sm text-gray-600">预览：</span>
+          <span class="text-sm text-gray-600">{{ globalText.common.preview }}</span>
           <div class="flex items-center gap-1">
             <span class="text-lg font-bold">{{ currentDay }}</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" 
@@ -227,14 +229,14 @@ export const BottomDrawer = {
             @click="confirm"
             class="w-full py-3 rounded-xl bg-blue-500 text-white font-medium active:bg-blue-600 transition-colors"
           >
-            添加
+            {{ globalText.common.add }}
           </button>
         </div>
         <!-- 已有标记显示区域 -->
         <div v-if="hasMarkers" class="px-5 py-4 border-t">
           <div class="flex justify-between items-center mb-3">
-            <p class="text-sm text-gray-600">当前日期的标记</p>
-            <span class="text-xs text-gray-400">点击标记可删除</span>
+            <p class="text-sm text-gray-600">{{ globalText.drawer.currentMarkers }}</p>
+            <span class="text-xs text-gray-400">{{ globalText.common.deleteTip }}</span>
           </div>
           <div class="flex flex-wrap gap-3 justify-center items-center">
             <div 
@@ -256,7 +258,7 @@ export const BottomDrawer = {
               <span class="text-xs text-gray-500">{{ marker.type }}</span>
             </div>
           </div>
-          <p class="text-xs text-gray-400 text-center mt-2">共 {{ currentDayMarkers.length }} 个标记</p>
+          <p class="text-xs text-gray-400 text-center mt-2">{{ globalText.common.total.replace("{count}", currentDayMarkers.length) }}</p>
         </div>
 
 

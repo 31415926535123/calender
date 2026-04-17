@@ -1,5 +1,6 @@
 // imageuploader.js
 import imageStorage from "./imagestorage.js";
+import globalText from "./locales/text.js";
 
 const ImageUploader = {
   name: "ImageUploader",
@@ -25,6 +26,7 @@ const ImageUploader = {
       finalUrl: null, // 最终图片（Base64）
       isLoading: false,
       errorMessage: "",
+      globalText,
     };
   },
 
@@ -69,7 +71,7 @@ const ImageUploader = {
         }
       } catch (error) {
         console.error("加载最终图片失败:", error);
-        this.errorMessage = "加载图片失败";
+        this.errorMessage = globalText.error.loadImageFailed;
       }
     },
 
@@ -78,7 +80,7 @@ const ImageUploader = {
       if (!file) return;
 
       if (!file.type.startsWith("image/")) {
-        this.errorMessage = "请选择图片文件";
+        this.errorMessage = globalText.error.selectImageFile;
         return;
       }
 
@@ -96,7 +98,7 @@ const ImageUploader = {
         console.log("图片保存成功:", savedImage.name);
       } catch (error) {
         console.error("上传失败:", error);
-        this.errorMessage = error.message || "上传失败";
+        this.errorMessage = error.message || globalText.error.uploadFailed;
       } finally {
         this.isLoading = false;
       }
@@ -104,7 +106,7 @@ const ImageUploader = {
 
     // 删除图片
     async deleteImage() {
-      if (!confirm("确定删除图片吗？")) {
+      if (!confirm(globalText.confirm.deleteImage)) {
         return;
       }
 
@@ -117,7 +119,7 @@ const ImageUploader = {
         console.log("图片删除成功");
       } catch (error) {
         console.error("删除失败:", error);
-        this.errorMessage = "删除失败";
+        this.errorMessage = globalText.error.deleteFailed;
       } finally {
         this.isLoading = false;
       }
@@ -164,7 +166,7 @@ const ImageUploader = {
         <div v-else
              class="rounded-full bg-gray-100 flex items-center justify-center shadow-lg hover:bg-gray-200 transition-colors"
              :style="{ width: size + 'px', height: size + 'px' }">
-          <span class="text-gray-400 text-2xl">+</span>
+          <span class="text-gray-400 text-2xl">{{ globalText.avatar.placeholder }}</span>
         </div>
       </div>
 

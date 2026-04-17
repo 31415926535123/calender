@@ -1,0 +1,63 @@
+export default {
+  common: {
+    confirm: "确认",
+    cancel: "取消",
+    add: "添加",
+    close: "✕",
+    preview: "预览：",
+    total: "共 {count} 个标记",
+    deleteTip: "点击标记可删除",
+  },
+  header: {
+    title: "{year}年{month}月",
+    prevMonth: "←",
+    nextMonth: "→",
+  },
+  week: {
+    sunday: "周日",
+    monday: "周一",
+    tuesday: "周二",
+    wednesday: "周三",
+    thursday: "周四",
+    friday: "周五",
+    saturday: "周六",
+  },
+  alert: {
+    maxMarkers: "超过可选上限",
+    duplicateMarker: "相同图形重复",
+  },
+  drawer: {
+    title: "为 {day} 号添加标记",
+    subtitle: "点击单元格打开此面板",
+    selectShape: "选择图形",
+    selectColor: "选择颜色",
+    currentMarkers: "当前日期的标记",
+  },
+  color: {
+    red: "Red",
+    blue: "Blue",
+    green: "Green",
+    yellow: "Yellow",
+    purple: "Purple",
+    pink: "Pink",
+    orange: "Orange",
+    gray: "Gray",
+  },
+  avatar: {
+    placeholder: "+",
+    updateSuccess: "头像更新成功",
+  },
+  error: {
+    loadImageFailed: "加载图片失败",
+    selectImageFile: "请选择图片文件",
+    uploadFailed: "上传失败",
+    deleteFailed: "删除失败",
+    compressionFailed: "图片压缩失败",
+    imageLoadFailed: "图片加载失败",
+    unsupportedFileType: "不支持的文件类型",
+    fileSizeExceeded: "文件大小不能超过 {size} MB",
+  },
+  confirm: {
+    deleteImage: "确定删除图片吗？",
+  },
+};
