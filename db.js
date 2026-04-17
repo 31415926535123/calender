@@ -13,7 +13,6 @@ class IndexedDBManager {
 
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
-
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
@@ -23,10 +22,7 @@ class IndexedDBManager {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
         if (!db.objectStoreNames.contains(this.storeName)) {
-          // 使用自增主键或keyPath，这里用id作为keyPath
-          const store = db.createObjectStore(this.storeName, { keyPath: "id" });
-          // 可以添加索引以便查询
-          store.createIndex("timestamp", "timestamp", { unique: false });
+          db.createObjectStore(this.storeName);
         }
       };
     });
@@ -39,60 +35,42 @@ class IndexedDBManager {
       this.db = null;
     }
   }
-
-  // 保存或更新数据
-  async save(id, data, metadata = {}) {
+  async save(data) {
     const db = await this.open();
-
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], "readwrite");
       const store = transaction.objectStore(this.storeName);
-
-      const record = {
-        id: id,
-        data: data, // 可以是 Blob、File、字符串等任何结构化的数据
-        metadata: {
-          ...metadata,
-          timestamp: new Date().toISOString(),
-          type: data instanceof Blob ? data.type : typeof data,
-        },
-      };
-
-      const request = store.put(record);
-
+      const record = data;
+      const request = store.put(record, 1);
       request.onsuccess = () => resolve(record);
       request.onerror = () => reject(request.error);
       transaction.oncomplete = () => this.close();
     });
   }
-
-  // 读取数据
-  async load(id) {
+  async load() {
     const db = await this.open();
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], "readonly");
       const store = transaction.objectStore(this.storeName);
-      const request = store.get(id);
+      const request = store.get(1);
 
       request.onsuccess = () => {
         const result = request.result;
-        resolve(result || null);
+        resolve(result);
       };
       request.onerror = () => reject(request.error);
       transaction.oncomplete = () => this.close();
     });
   }
 
-  // 删除数据
-  async delete(id) {
+  async delete() {
     const db = await this.open();
 
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([this.storeName], "readwrite");
       const store = transaction.objectStore(this.storeName);
-      const request = store.delete(id);
-
+      const request = store.delete(1);
       request.onsuccess = () => resolve(true);
       request.onerror = () => reject(request.error);
       transaction.oncomplete = () => this.close();

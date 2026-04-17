@@ -152,20 +152,12 @@ class ImageStorageManager {
     // 准备存储数据
     const id = customId || this.config.storageKey;
     const imageData = {
-      name: file.name,
-      type: file.type,
-      size: file.size,
       previewBase64: previewBase64,
       normalBase64: normalBase64,
-      timestamp: new Date().toISOString(),
     };
 
     // 使用独立数据库模块保存
-    await this.db.save(id, imageData, {
-      originalName: file.name,
-      originalType: file.type,
-      originalSize: file.size,
-    });
+    await this.db.save(imageData);
 
     // 同时保存到localStorage作为快速预览（保持原功能）
     localStorage.setItem(`img_preview_${id}`, previewBase64);
@@ -180,16 +172,15 @@ class ImageStorageManager {
   }
 
   // 异步加载完整图片
-  async loadImage(id = null) {
-    const imageId = id || this.config.storageKey;
-    const result = await this.db.load(imageId);
-    return result ? result.data : null;
+  async loadImage() {
+    const result = await this.db.load();
+    return result;
   }
 
   // 删除图片
   async deleteImage(id = null) {
     const imageId = id || this.config.storageKey;
-    await this.db.delete(imageId);
+    await this.db.delete();
     localStorage.removeItem(`img_preview_${imageId}`);
     return true;
   }

@@ -66,10 +66,13 @@ const ImageUploader = {
     async loadFinalImage() {
       try {
         const imageData = await imageStorage.loadImage();
+        console.log(1);
         if (imageData && imageData.normalBase64) {
+          console.log(1);
           this.finalUrl = imageData.normalBase64;
         }
       } catch (error) {
+        console.log(1);
         console.error("加载最终图片失败:", error);
         this.errorMessage = globalText.error.loadImageFailed;
       }
