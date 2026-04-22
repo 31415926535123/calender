@@ -36,10 +36,13 @@ class StorageManager {
   constructor() {
     this.variables = new Map();
   }
-  register(key, defaultValue) {
+  register(key, defaultValue, noRepeat = false) {
     if (this.variables.has(key)) {
-      console.log(`变量 ${key} 已存在，直接返回`);
-      return this.variables.get(key).data;
+      if (noRepeat) {
+        throw new Error(`键${key} 已存在`);
+      } else {
+        return this.variables.get(key);
+      }
     }
 
     const storedValue = this.loadFromStorage(key);
@@ -54,9 +57,7 @@ class StorageManager {
       { deep: true },
     );
 
-    this.variables.set(key, {
-      data,
-    });
+    this.variables.set(key, data);
     return data;
   }
   saveToStorage(key, value) {

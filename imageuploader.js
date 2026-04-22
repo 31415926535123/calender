@@ -1,7 +1,8 @@
 // imageuploader.js
+import { ref, computed, onMounted } from "vue";
 import imageStorage from "./imagestorage.js";
 import globalText from "./locales/text.js";
-
+import { storage } from "./store.js";
 const ImageUploader = {
   name: "ImageUploader",
 
@@ -20,137 +21,145 @@ const ImageUploader = {
     },
   },
 
-  data() {
-    return {
-      previewUrl: null, // 快速预览（Base64）
-      finalUrl: null, // 最终图片（Base64）
-      isLoading: false,
-      errorMessage: "",
-      globalText,
-    };
-  },
+  setup(props) {
+    // 响应式数据
+    const previewUrl = ref(null);
+    const finalUrl = ref(null);
+    const exist = storage.register("imageuploader_imageexist", false);
+    const errorMessage = ref("");
+    const fileInputRef = ref(null);
 
-  computed: {
-    positionStyle() {
+    // 计算属性
+    const positionStyle = computed(() => {
       const positions = {
         "top-left": { top: "20px", left: "20px" },
         "top-right": { top: "20px", right: "20px" },
         "bottom-left": { bottom: "20px", left: "20px" },
         "bottom-right": { bottom: "20px", right: "20px" },
       };
-      return positions[this.position] || positions["top-left"];
-    },
-  },
-
-  mounted() {
-    // 设置存储键名
-    imageStorage.setStorageKey(this.storageKey);
-    // 加载图片
-    this.loadImageProgressive();
-  },
-
-  methods: {
-    // 渐进式加载图片
-    async loadImageProgressive() {
-      // 第一步：立即显示预览图（从localStorage同步读取）
-      const previewBase64 = imageStorage.getPreviewSync();
-      if (previewBase64) {
-        this.previewUrl = previewBase64;
-      }
-
-      // 第二步：加载最终图片
-      await this.loadFinalImage();
-    },
+      return positions[props.position] || positions["top-left"];
+    });
 
     // 加载最终图片
-    async loadFinalImage() {
+    const loadFinalImage = async () => {
       try {
         const imageData = await imageStorage.loadImage();
-        console.log(1);
-        if (imageData && imageData.normalBase64) {
-          console.log(1);
-          this.finalUrl = imageData.normalBase64;
+        if (imageData) {
+          finalUrl.value = URL.createObjectURL(imageData);
         }
       } catch (error) {
-        console.log(1);
         console.error("加载最终图片失败:", error);
-        this.errorMessage = globalText.error.loadImageFailed;
+        errorMessage.value = globalText.error.loadImageFailed;
       }
-    },
+    };
+
+    // 渐进式加载图片（保持原接口）
+    const loadImageProgressive = async () => {
+      await loadFinalImage();
+    };
 
     // 上传图片
-    async uploadImage(file) {
+    const uploadImage = async (file) => {
       if (!file) return;
 
       if (!file.type.startsWith("image/")) {
-        this.errorMessage = globalText.error.selectImageFile;
+        errorMessage.value = globalText.error.selectImageFile;
         return;
       }
-
-      this.isLoading = true;
-      this.errorMessage = "";
+      errorMessage.value = "";
 
       try {
-        imageStorage.setStorageKey(this.storageKey);
+        imageStorage.setStorageKey(props.storageKey);
         const savedImage = await imageStorage.saveImage(file);
-
-        // 更新显示
-        this.previewUrl = savedImage.previewBase64;
-        this.finalUrl = savedImage.normalBase64;
-
+        exist.value = true;
+        finalUrl.value = URL.createObjectURL(savedImage);
         console.log("图片保存成功:", savedImage.name);
       } catch (error) {
         console.error("上传失败:", error);
-        this.errorMessage = error.message || globalText.error.uploadFailed;
+        errorMessage.value = error.message || globalText.error.uploadFailed;
       } finally {
-        this.isLoading = false;
       }
-    },
+    };
 
     // 删除图片
-    async deleteImage() {
+    const deleteImage = async () => {
       if (!confirm(globalText.confirm.deleteImage)) {
         return;
       }
 
-      this.isLoading = true;
+      isLoading.value = true;
 
       try {
         await imageStorage.deleteImage();
-        this.previewUrl = null;
-        this.finalUrl = null;
+        previewUrl.value = null;
+        finalUrl.value = null;
         console.log("图片删除成功");
       } catch (error) {
         console.error("删除失败:", error);
-        this.errorMessage = globalText.error.deleteFailed;
+        errorMessage.value = globalText.error.deleteFailed;
       } finally {
-        this.isLoading = false;
+        isLoading.value = false;
       }
-    },
+    };
 
     // 触发文件选择
-    triggerFileInput() {
-      this.$refs.fileInput.click();
-    },
+    const triggerFileInput = () => {
+      fileInputRef.value.click();
+    };
 
     // 处理文件选择
-    handleFileChange(event) {
+    const handleFileChange = (event) => {
       const file = event.target.files[0];
       if (file) {
-        this.uploadImage(file);
+        uploadImage(file);
         event.target.value = ""; // 清空input
       }
-    },
+    };
+
+    // 挂载时加载图片
+    onMounted(() => {
+      imageStorage.setStorageKey(props.storageKey);
+      loadImageProgressive();
+    });
+
+    // 暴露给父组件的方法（保持与原 Options API 相同的公开接口）
+    const exposeMethods = {
+      loadImageProgressive,
+      uploadImage,
+      deleteImage,
+      triggerFileInput,
+      handleFileChange,
+    };
+
+    return {
+      // 数据
+      previewUrl,
+      finalUrl,
+      errorMessage,
+      globalText,
+      exist,
+      // 计算属性
+      positionStyle,
+      // ref
+      fileInputRef,
+      // 方法
+      triggerFileInput,
+      handleFileChange,
+      uploadImage,
+      deleteImage,
+      loadImageProgressive,
+    };
   },
 
   template: `
     <div>
       <div class="fixed cursor-pointer" :style="positionStyle" @click="triggerFileInput">
         <!-- 加载状态 -->
-        <div v-if="isLoading" 
-             class="rounded-full bg-gray-200 flex items-center justify-center"
+        <!-- 占位符 -->
+        <div v-if="!exist"
+             class="rounded-full bg-gray-100 flex items-center justify-center shadow-lg hover:bg-gray-200 transition-colors"
              :style="{ width: size + 'px', height: size + 'px' }">
-          <div class="loader"></div>
+          <span class="text-gray-400 text-2xl">{{ globalText.avatar.placeholder }}</span>
         </div>
         
         <!-- 最终图片（优先显示） -->
@@ -165,12 +174,7 @@ const ImageUploader = {
              class="rounded-full border-2 border-white shadow-lg object-cover blur-sm"
              :style="{ width: size + 'px', height: size + 'px' }">
         
-        <!-- 占位符 -->
-        <div v-else
-             class="rounded-full bg-gray-100 flex items-center justify-center shadow-lg hover:bg-gray-200 transition-colors"
-             :style="{ width: size + 'px', height: size + 'px' }">
-          <span class="text-gray-400 text-2xl">{{ globalText.avatar.placeholder }}</span>
-        </div>
+
       </div>
 
       <!-- 错误提示 -->
@@ -181,7 +185,7 @@ const ImageUploader = {
 
       <!-- 隐藏的文件输入框 -->
       <input type="file" 
-             ref="fileInput" 
+             ref="fileInputRef" 
              class="hidden" 
              accept="image/jpeg,image/png,image/gif,image/webp"
              @change="handleFileChange">
