@@ -1,5 +1,5 @@
 import { ref, watch, computed } from "vue";
-import globalText from "./locales/text.js";
+import globalText from "../i18n/text.js";
 const MARKER_SHAPES = [
   {
     type: "circle",

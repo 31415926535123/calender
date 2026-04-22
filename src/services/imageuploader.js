@@ -1,8 +1,8 @@
 // imageuploader.js
 import { ref, computed, onMounted } from "vue";
 import imageStorage from "./imagestorage.js";
-import globalText from "./locales/text.js";
-import { storage } from "./store.js";
+import globalText from "../i18n/text.js";
+import { storage } from "../store/store.js";
 import { auth } from "./auth.js";
 import { currentTheme, toggleTheme, initTheme, themes } from "./theme.js"; // 新增导入
 
@@ -229,7 +229,7 @@ const ImageUploader = {
     const errorMessage = ref("");
     const fileInputRef = ref(null);
     const userName = auth.getUser();
-
+console.log(userName);
     // 计算属性
     const positionStyle = computed(() => {
       const positions = {

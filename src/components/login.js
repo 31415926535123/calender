@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import { auth } from "./auth.js";
+import { auth } from "../services/auth.js";
 
 export const Login = {
   setup(props, { emit }) {

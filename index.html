@@ -3,26 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico"/>
     <link rel="manifest" href="manifest.json" />
-    <link rel="stylesheet" href="./index.css" />
+    <link rel="stylesheet" href="index.css" />
     <script>
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("sw.js");
+        navigator.serviceWorker.register("lib/sw.js");
       }
     </script>
   </head>
   <body>
     <div id="app"></div>
-    <script src="./tailwindcss.js"></script>
+    <script src="lib/tailwindcss.js"></script>
     <script type="importmap">
       {
         "imports": {
-          "vue": "./vue.js"
+          "vue": "./lib/vue.js"
         }
       }
     </script>
     <script type="module">
-      import longpressDirective from "./longpress.js";
+      import longpressDirective from "./src/directives/longpress.js";
       import { createApp, ref, computed, watch } from "vue";
       import main from "./index.js";
       const app = createApp(main);

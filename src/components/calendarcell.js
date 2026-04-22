@@ -1,6 +1,6 @@
 import { createApp, ref, computed, watch } from "vue";
-import { LargeEditorModal, CalendarMarker } from "./utils.js";
-import { storage } from "./store.js";
+import { LargeEditorModal, CalendarMarker } from "../utils.js";
+import { storage } from "../store/store.js";
 export const CalendarCell = {
   props: ["year", "month", "day", "markers"],
   emits: ["openDrawer"],

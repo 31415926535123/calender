@@ -89,10 +89,7 @@ class AuthService {
       const result = await this.storageAPI(username.trim(), password);
 
       if (result.success) {
-        this.currentUser = {
-          username: result.username,
-          loginTime: new Date().toISOString(),
-        };
+        this.currentUser =  result.username;
         this.isLoggedIn = true;
         this.notifyListeners();
         return result;

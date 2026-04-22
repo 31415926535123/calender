@@ -9,14 +9,14 @@ const themes = {
 
 // 响应式主题状态
 const currentTheme = ref(localStorage.getItem(THEME_KEY) || themes.light);
-
+const html=document.documentElement;
+const body=document.body;
 // 应用主题到html根元素
 const applyTheme = (theme) => {
   if (theme === themes.dark) {
-    document.documentElement.classList.add("dark-mode");
+    html.classList.add("dark-mode");
   } else {
-    document.documentElement.classList.remove("dark-mode");
-  }
+    html.classList.remove("dark-mode"); }
   localStorage.setItem(THEME_KEY, theme);
 };
 

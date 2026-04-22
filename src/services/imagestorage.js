@@ -1,5 +1,5 @@
 // imageStorage.js - 专门处理图片存储的模块
-import IndexedDBManager from "./db.js";
+import IndexedDBManager from "../db/db.js";
 
 class ImageStorageManager {
   constructor() {

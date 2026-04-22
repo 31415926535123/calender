@@ -1,7 +1,7 @@
 import { createApp, ref, computed, onMounted, onUnmounted } from "vue";
-import { Calendar } from "./calendar.js";
-import { Login } from "./login.js";
-import { auth } from "./auth.js";
+import { Calendar } from "./src/components/calendar.js";
+import { Login } from "./src/components/login.js";
+import { auth } from "./src/services/auth.js";
 
 const main = {
   setup() {

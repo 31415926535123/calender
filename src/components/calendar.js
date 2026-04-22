@@ -1,11 +1,10 @@
-import imageStorage from "./imagestorage.js";
-import ImageUploader from "./imageuploader.js";
-
+import imageStorage from "../services/imagestorage.js";
+import ImageUploader from "../services/imageuploader.js";
 import { CalendarCell } from "./calendarcell.js";
-import { storage } from "./store.js";
+import { storage } from "../store/store.js";
 import { createApp, ref, computed, watch } from "vue";
 import { BottomDrawer } from "./bottomdrawer.js";
-import globalText from "./locales/text.js";
+import globalText from "../i18n/text.js";
 export const Calendar = {
   setup() {
     (async () => {
