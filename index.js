@@ -47,8 +47,6 @@ const main = {
   },
   template: `
     <div>
-      <div v-if="currentUser" class="bg-blue-100 p-3 flex justify-between items-center shadow-sm">
-      </div>
       <Calendar v-if="login" />
       <Login v-else @update:login="handleLoginUpdate" />
     </div>

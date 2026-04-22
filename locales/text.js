@@ -60,4 +60,13 @@ export default {
   confirm: {
     deleteImage: "确定删除图片吗？",
   },
+  panel: {
+    title: "头像设置",
+    currentAvatar: "当前头像",
+    upload: "上传新图片",
+    delete: "删除头像",
+    theme: "主题设置",
+    themeHint: "切换界面颜色模式",
+    hint: "支持 JPG、PNG、GIF、WebP 格式",
+  },
 };
