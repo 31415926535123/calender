@@ -12,10 +12,9 @@ class ImageStorageManager {
       allowedTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
     };
     this.imageConfig = {
-      maxWidth: 120,
-      maxHeight: 120,
-      quality: 0.77,
-      targetType: "image/webp",
+      maxWidth: 200,
+      maxHeight: 200,
+      quality: 1,
     };
     // 使用独立的数据库操作模块
     this.db = new IndexedDBManager(
@@ -67,11 +66,9 @@ class ImageStorageManager {
               return;
             }
 
-            const compressedFile = new File(
-              [blob],
-              file.name.replace(/\.[^/.]+$/, ".webp"),
-              { type: this.imageConfig.targetType },
-            );
+            const compressedFile = new File([blob], file.name, {
+              type: file.type,
+            });
 
             resolve(compressedFile);
           },
@@ -100,7 +97,7 @@ class ImageStorageManager {
   }
 
   // 保存图片
-  async saveImage(file, customId = null) {
+  async saveImage(file) {
     // 验证文件类型
     if (!this.config.allowedTypes.includes(file.type)) {
       throw new Error("不支持的文件类型");
@@ -112,10 +109,11 @@ class ImageStorageManager {
         `文件大小不能超过 ${this.config.maxSize / (1024 * 1024)}MB`,
       );
     }
-
-    // 生成压缩版本
-    file = await this.generateNormalImage(file);
-
+    //跳过gif,避免影响动画
+    if (file.type !== "image/gif") {
+      // 生成压缩版本
+      file = await this.generateNormalImage(file);
+    }
     await this.db.save(file);
 
     return file;

@@ -4,7 +4,6 @@ import imageStorage from "./imagestorage.js";
 import globalText from "../i18n/text.js";
 import { storage } from "../store/store.js";
 import { auth } from "./auth.js";
-import { currentTheme, toggleTheme, initTheme, themes } from "./theme.js"; // 新增导入
 
 // Panel 子组件定义（修改后的完整版本）
 const SettingsPanel = {
@@ -26,10 +25,6 @@ const SettingsPanel = {
   emits: ["close", "upload", "delete"],
   setup(props, { emit }) {
     const fileInputRef = ref(null);
-
-    // 主题相关
-    const theme = currentTheme;
-    const isDarkMode = computed(() => theme.value === themes.dark);
 
     const triggerFileSelect = () => {
       fileInputRef.value.click();
@@ -53,10 +48,6 @@ const SettingsPanel = {
       emit("close");
     };
 
-    const handleThemeToggle = () => {
-      toggleTheme();
-    };
-
     // 点击遮罩关闭
     const handleOverlayClick = (e) => {
       if (e.target === e.currentTarget) {
@@ -73,7 +64,6 @@ const SettingsPanel = {
 
     onMounted(() => {
       document.addEventListener("keydown", handleKeydown);
-      initTheme(); // 初始化主题
     });
 
     return {
@@ -83,11 +73,7 @@ const SettingsPanel = {
       handleDelete,
       handleClose,
       handleOverlayClick,
-      handleThemeToggle,
       globalText,
-      theme,
-      isDarkMode,
-      themes,
     };
   },
   template: `
@@ -158,28 +144,6 @@ const SettingsPanel = {
               </button>
             </div>
 
-            <!-- 主题设置区域 -->
-            <div class="w-full max-w-md pt-4 border-t border-gray-100">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h4 class="font-medium text-gray-700">{{ globalText.panel.theme || '主题设置' }}</h4>
-                  <p class="text-xs text-gray-400 mt-1">{{ globalText.panel.themeHint || '切换界面颜色模式' }}</p>
-                </div>
-                <button
-                  @click="handleThemeToggle"
-                  class="relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none"
-                  :class="isDarkMode ? 'bg-gray-700' : 'bg-blue-500'"
-                >
-                  <span
-                    class="inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-md flex items-center justify-center text-sm"
-                    :class="isDarkMode ? 'translate-x-7' : 'translate-x-1'"
-                  >
-                    <span v-if="!isDarkMode">☀️</span>
-                    <span v-else>🌙</span>
-                  </span>
-                </button>
-              </div>
-            </div>
 
             <!-- 提示文字 -->
             <p class="text-xs text-gray-400 text-center mt-2">
@@ -229,7 +193,7 @@ const ImageUploader = {
     const errorMessage = ref("");
     const fileInputRef = ref(null);
     const userName = auth.getUser();
-console.log(userName);
+    console.log(userName);
     // 计算属性
     const positionStyle = computed(() => {
       const positions = {
@@ -336,7 +300,6 @@ console.log(userName);
     onMounted(() => {
       imageStorage.setStorageKey(props.storageKey);
       loadImageProgressive();
-      initTheme(); // 初始化主题
     });
 
     return {

@@ -44,7 +44,6 @@ class IndexedDBManager {
       const request = store.put(record, 1);
       request.onsuccess = () => resolve(record);
       request.onerror = () => reject(request.error);
-      transaction.oncomplete = () => this.close();
     });
   }
   async load() {

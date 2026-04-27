@@ -1,8 +1,0 @@
-/* 暗色模式 - 使用CSS反色 */
-.dark-mode {
-  filter: invert(1) hue-rotate(180deg);
-  img,
-  video {
-    filter: invert(1) hue-rotate(180deg);
-  }
-}
